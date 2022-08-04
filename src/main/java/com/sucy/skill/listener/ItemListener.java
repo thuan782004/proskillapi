@@ -209,7 +209,7 @@ public class ItemListener extends SkillAPIListener {
 //            playerData.updatePlayerStat(player);
 //        }
 //    }
-
+    //todo see this
     @EventHandler
     public void armorEquip(ArmorEquipEvent event) {
         Player    player = event.getPlayer();

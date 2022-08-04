@@ -131,6 +131,7 @@ public class Settings {
             ITEM_EXCLUDE           = ITEM_BASE + "lore-exclude-text",
             ITEM_ATTR              = ITEM_BASE + "lore-attribute-text",
             ITEM_STATS             = ITEM_BASE + "attribute-text",
+            ITEM_PASSIVE           = ITEM_BASE + "passive-text",
             ITEM_SLOTS             = ITEM_BASE + "slots",
             CAST_BASE              = "Casting.",
             CAST_ENABLED           = CAST_BASE + "enabled",
@@ -332,6 +333,7 @@ public class Settings {
     private         String              skillPre, skillPost;
     private String attrReqPre, attrReqPost;
     private String attrPre, attrPost;
+    private String attrPassivePre, attrPassivePost;
     private         List<String> titleMessages;
     /**
      * Checks whether old health bars (fixed 10 hearts) are enabled
@@ -1007,6 +1009,11 @@ public class Settings {
     public String getAttrGiveText(String attr) {
         return attrPre + attr + attrPost;
     }
+    public String getPassiveRegex() {
+        return   (Objects.equals(attrPassivePre, "")?"":("(?<="+attrPassivePre+"\\s*)"))
+                +".*"
+                +(Objects.equals(attrPassivePost, "")?"":("?(?=\\s*"+attrPassivePost+")"));
+    }
 
     private void loadItemSettings() {
         checkLore = config.getBoolean(ITEM_LORE);
@@ -1031,6 +1038,11 @@ public class Settings {
         index = temp.indexOf('{');
         attrPre = temp.substring(0, index);
         attrPost = temp.substring(index + 6);
+
+        temp = config.getString(ITEM_PASSIVE).toLowerCase();
+        index = temp.indexOf('{');
+        attrPassivePre = temp.substring(0, index);
+        attrPassivePost = temp.substring(index + 7);
 
         List<String> slotList = config.getList(ITEM_SLOTS);
         if (!VersionManager.isVersionAtLeast(VersionManager.V1_9_0)) {slotList.remove("40");}

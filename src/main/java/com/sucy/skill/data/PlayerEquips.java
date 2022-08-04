@@ -42,6 +42,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Handles keeping track of and applying attribute
@@ -49,10 +51,13 @@ import java.util.Map.Entry;
  */
 public class PlayerEquips {
 
+    public static final int cosmetic = 1000;
+    public static final int label = 2000;
+
     private final PlayerData playerData;
 
     private final EquipData                   emptyEquip   = new EquipData();
-    private final HashMap<Integer, EquipData> equips       = new HashMap<Integer, EquipData>();
+    private final HashMap<Integer, EquipData> equips       = new HashMap<>();
     private       EquipData                   handHeldItem = new EquipData();
 
     /**
@@ -183,9 +188,8 @@ public class PlayerEquips {
         return true;
     }
 
-    public EquipData getEquipData(ItemStack item, EquipType type) {
-        return new EquipData(item, type);
-    }
+    public EquipData getEquipData(ItemStack item) {return new EquipData(item,EquipType.EXTERNAL_ITEM);}
+    public EquipData getEquipData(ItemStack item, EquipType type)   {return new EquipData(item, type);}
 
     public enum EquipType {
 
@@ -201,7 +205,7 @@ public class PlayerEquips {
 
         public static EquipType fromSlot(int slot) {
             switch (slot) {
-                case 0 - 8:
+                case - 8:
                     return HOT_BAR_ITEM;
                 case 9 - 35:
                     return INVENTORY_ITEM;
@@ -238,7 +242,7 @@ public class PlayerEquips {
      * Represents one available item's data
      */
     public class EquipData {
-        private final ArrayList<UUID>          attrModifierUUIDs = new ArrayList<UUID>();
+        private final ArrayList<UUID>          attrModifierUUIDs = new ArrayList<>();
         private       HashMap<String, Integer> skillReq;
         private       HashMap<String, Integer> attrReq;
         private       HashMap<String, Integer> attribs;
@@ -247,6 +251,7 @@ public class PlayerEquips {
         private       ItemStack                item;
         private       int                      levelReq;
         private       EquipType                type;
+        private final List<Skill>              passive = new ArrayList<>();;
 
         /**
          * Sets up for an empty item slot
@@ -279,6 +284,7 @@ public class PlayerEquips {
             String   classText   = settings.getLoreClassText();
             String   excludeText = settings.getLoreExcludeText();
             String   levelText   = settings.getLoreLevelText();
+            String   passiveText = settings.getPassiveRegex();
             boolean  skills      = settings.isCheckSkills();
             boolean  attributes  = settings.isAttributesEnabled();
 
@@ -304,7 +310,8 @@ public class PlayerEquips {
                     if (classExc == null)
                         classExc = new HashSet<>();
                     classExc.addAll(excluded);
-                } else {
+                }
+                else {
                     boolean done = false;
 
                     // Skill requirements
@@ -348,12 +355,20 @@ public class PlayerEquips {
                             }
                         }
                     }
+
+                    if (!done){
+                        Matcher matcher = Pattern.compile(passiveText).matcher(lower);
+                        boolean f = !matcher.find();
+                        if (f) continue;
+                        Skill s = SkillAPI.getSkill(matcher.group());
+                        if (s!=null) passive.add(s);
+                    }
                 }
             }
         }
 
         /**
-         * Applies bonus attributes for the item
+         * Applies bonus attributes and skill for the item
          */
         private void apply() {
             if (attribs != null) {
@@ -363,16 +378,22 @@ public class PlayerEquips {
                     playerData.addAttributeModifier(entry.getKey(), attrModifier, false);
                 }
             }
+            if (passive.size()>0){
+                passive.forEach(playerData::addTempSkill);
+            }
         }
 
         /**
-         * Reverts bonus attributes for the item
+         * Reverts bonus attributes and skill for the item
          */
         private void revert() {
             if (attribs != null) {
                 for (UUID uuid : this.attrModifierUUIDs) {
                     playerData.removeAttributeModifier(uuid, false);
                 }
+            }
+            if (passive.size()>0){
+                passive.forEach(playerData::removeTempSkill);
             }
         }
 

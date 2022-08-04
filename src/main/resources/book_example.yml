@@ -1,0 +1,18 @@
+1:
+  - '&9Example for a great book'
+  - '&9right %player_name% ?'
+2:
+  - '&8You can add a normal text'
+  - '&8or you can add [&9&lsomethings]hover[&9like a hover tool tip]'
+  - '&8like a [&9Clickable link]hover[&9Click me]link[https://www.youtube.com/watch?v=dQw4w9WgXcQ]'
+  - '&8or execute a [&9Command]hover[&9please click :3]run[/kill]'
+  - '&8it can [&9change]hover[&9Click again please ~3~]page[3]&8 page too'
+3:
+  - '&6Are you excited'
+
+# On click action, you can use:
+#     run   ->  use command(have "/")
+#     link  ->  open url
+#     page  ->  goto page
+#     copy  -> copy text to clipboard
+#     suggest -> suggest command to chat box

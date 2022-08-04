@@ -51,6 +51,7 @@ import com.sucy.skill.language.RPGFilter;
 import com.sucy.skill.log.LogType;
 import com.sucy.skill.log.Logger;
 import com.sucy.skill.manager.AttributeManager;
+import com.sucy.skill.manager.RegistrationManager;
 import com.sucy.skill.task.ScoreboardTask;
 import mc.promcteam.engine.NexEngine;
 import mc.promcteam.engine.api.meta.NBTAttribute;
@@ -59,12 +60,14 @@ import mc.promcteam.engine.mccore.config.FilterType;
 import mc.promcteam.engine.mccore.config.parse.DataSection;
 import mc.promcteam.engine.mccore.util.VersionManager;
 import mc.promcteam.engine.utils.EntityUT;
+import mc.promcteam.engine.utils.ItemUT;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -88,9 +91,11 @@ public class PlayerData {
     public final  HashMap<String, Integer>                       attributes          = new HashMap<>();
     private final HashMap<String, PlayerClass>                   classes             = new HashMap<>();
     private final HashMap<String, PlayerSkill>                   skills              = new HashMap<>();
+    private final HashMap<String, PlayerSkill>                   tempSkills          = new HashMap<>();
     private final HashMap<Material, PlayerSkill>                 binds               = new HashMap<>();
     private final HashMap<String, List<PlayerAttributeModifier>> attributesModifiers = new HashMap<>();
     private final HashMap<String, List<PlayerStatModifier>>      statModifiers       = new HashMap<>();
+    private final HashMap<Integer, ItemStack>                    cosmetic            = new HashMap<>();
 
     private final DataSection    extraData  = new DataSection();
     private final UUID           playerUUID;
@@ -112,6 +117,7 @@ public class PlayerData {
     private       boolean        passive;
     private       long           skillTimer;
     private       BukkitTask     removeTimer;
+    private final YamlConfiguration vault = new YamlConfiguration();
 
     /**
      * Initializes a new account data representation for a player.
@@ -464,6 +470,20 @@ public class PlayerData {
         }
     }
 
+    public void addTempSkill(Skill s){
+        if (skills.containsKey(s.getKey())&&skills.get(s.getKey()).getLevel()>0) return;
+        if (!s.isCompatible(this)) return;
+        PlayerSkill skill = new PlayerSkill(this, s, getMainClass());
+        skill.setLevel(1);
+        tempSkills.put(s.getKey(), skill);
+        ((PassiveSkill) skill.getData()).initialize(getPlayer(), skill.getLevel());
+    }
+    public void removeTempSkill(Skill s){
+		if (!tempSkills.containsKey(s.getKey())) return;
+        ((PassiveSkill) tempSkills.get(s.getKey()).getData()).stopEffects(getPlayer(), 1);
+        tempSkills.remove(s.getKey());
+    }
+
     /**
      * Get all attribute modifier from the player.
      *
@@ -694,7 +714,7 @@ public class PlayerData {
      * @return true if has the skill, false otherwise
      */
     public boolean hasSkill(String name) {
-        return name != null && skills.containsKey(name.toLowerCase());
+        return name != null && getAllSkills().containsKey(name.toLowerCase());
     }
 
     /**
@@ -707,12 +727,12 @@ public class PlayerData {
         if (name == null) {
             return null;
         }
-        return skills.get(name.toLowerCase());
+        return getAllSkills().get(name.toLowerCase());
     }
 
     public int getInvestedSkillPoints() {
         int total = 0;
-        for (PlayerSkill playerSkill : skills.values()) {
+        for (PlayerSkill playerSkill : getAllSkills().values()) {
             total += playerSkill.getInvestedCost();
         }
         return total;
@@ -726,6 +746,9 @@ public class PlayerData {
      * @return collection of skill data for the owner
      */
     public Collection<PlayerSkill> getSkills() {
+        return getAllSkills().values();
+    }
+    public Collection<PlayerSkill> getTrueSkills() {
         return skills.values();
     }
 
@@ -759,7 +782,7 @@ public class PlayerData {
      */
     public void giveSkill(Skill skill, PlayerClass parent) {
         String key = skill.getKey();
-        if (!skills.containsKey(key)) {
+        if (!getAllSkills().containsKey(key)) {
             addSkill(skill, parent);
             autoLevel(skill);
         }
@@ -767,7 +790,7 @@ public class PlayerData {
 
     public void addSkill(Skill skill, PlayerClass parent) {
         String key = skill.getKey();
-        if (!skills.containsKey(key)) {
+        if (!getAllSkills().containsKey(key)) {
             PlayerSkill data = new PlayerSkill(this, skill, parent);
             skills.put(key, data);
             combos.addSkill(skill);
@@ -787,7 +810,7 @@ public class PlayerData {
             return;
         }
 
-        for (PlayerSkill skill : skills.values()) {
+        for (PlayerSkill skill : getAllSkills().values()) {
             if (skill.getData().isAllowed(player)) {
                 autoLevel(skill.getData());
             }
@@ -795,7 +818,7 @@ public class PlayerData {
     }
 
     private void autoLevel(Skill skill) {
-        PlayerSkill data = skills.get(skill.getKey());
+        PlayerSkill data = getAllSkills().get(skill.getKey());
         if (data == null || getPlayer() == null || !skill.isAllowed(getPlayer())) {
             return;
         }
@@ -900,7 +923,7 @@ public class PlayerData {
         }
 
         // Must be a valid available skill
-        PlayerSkill data = skills.get(skill.getName().toLowerCase());
+        PlayerSkill data = getAllSkills().get(skill.getName().toLowerCase());
         if (data == null) {
             return false;
         }
@@ -911,7 +934,7 @@ public class PlayerData {
         }
 
         // Must not be required by another skill
-        for (PlayerSkill s : skills.values()) {
+        for (PlayerSkill s : getAllSkills().values()) {
             if (s.getData().getSkillReq() != null && s.getData().getSkillReq().equalsIgnoreCase(skill.getName()) && data.getLevel() <= s.getData().getSkillReqLevel() && s.getLevel() > 0) {
                 return false;
             }
@@ -986,7 +1009,7 @@ public class PlayerData {
      * Refunds all skills for the player
      */
     public void refundSkills() {
-        for (PlayerSkill skill : skills.values()) {
+        for (PlayerSkill skill : getAllSkills().values()) {
             refundSkill(skill);
         }
 
@@ -1049,7 +1072,7 @@ public class PlayerData {
      */
     public boolean showSkills(Player player) {
         // Cannot show an invalid player, and cannot show no skills
-        if (player == null || classes.size() == 0 || skills.size() == 0) {
+        if (player == null || classes.size() == 0 || getAllSkills().size() == 0) {
             return false;
         }
 
@@ -1172,8 +1195,8 @@ public class PlayerData {
         if (c != null) {
             for (Skill skill : c.getData().getSkills()) {
                 String nm = skill.getName().toLowerCase();
-                if (!reset && SkillAPI.getSettings().isRefundOnClassChange() && skills.containsKey(nm))
-                    givePoints(skills.get(nm).getPoints(), ExpSource.SPECIAL);
+                if (!reset && SkillAPI.getSettings().isRefundOnClassChange() && getAllSkills().containsKey(nm))
+                    givePoints(getAllSkills().get(nm).getPoints(), ExpSource.SPECIAL);
 
                 skills.remove(nm);
                 combos.removeSkill(skill);
@@ -2018,7 +2041,7 @@ public class PlayerData {
             return;
         }
         passive = true;
-        for (PlayerSkill skill : skills.values()) {
+        for (PlayerSkill skill : getAllSkills().values()) {
             if (skill.isUnlocked() && (skill.getData() instanceof PassiveSkill)) {
                 ((PassiveSkill) skill.getData()).initialize(player, skill.getLevel());
             }
@@ -2036,7 +2059,7 @@ public class PlayerData {
             return;
         }
         passive = false;
-        for (PlayerSkill skill : skills.values()) {
+        for (PlayerSkill skill : getAllSkills().values()) {
             if (skill.isUnlocked() && (skill.getData() instanceof PassiveSkill)) {
                 try {
                     ((PassiveSkill) skill.getData()).stopEffects(player, skill.getLevel());
@@ -2057,7 +2080,7 @@ public class PlayerData {
      * @return true if successfully cast the skill, false otherwise
      */
     public boolean cast(String skillName) {
-        return cast(skills.get(skillName.toLowerCase()));
+        return cast(getAllSkills().get(skillName.toLowerCase()));
     }
 
     /**
@@ -2227,5 +2250,29 @@ public class PlayerData {
 
         this.autoLevel();
         this.updateScoreboard();
+    }
+
+    public YamlConfiguration getVaultData(){
+        return vault;
+    }
+    public DataSection getVaultDataSection(){
+        DataSection section = new DataSection();
+        section.set("size",vault.getInt("size"));
+        for (int i = 0; i < vault.getInt("size", 0); i++) {
+            ItemStack item = vault.getItemStack(String.valueOf(i));
+            section.set(String.valueOf(i),item==null?null:ItemUT.toBase64(item));
+        }
+        return section;
+    }
+
+    private HashMap<String,PlayerSkill> getAllSkills(){
+        HashMap<String,PlayerSkill> allSkills = new HashMap<>();
+        allSkills.putAll(skills);
+        allSkills.putAll(tempSkills);
+        return allSkills;
+    }
+
+    public HashMap<Integer, ItemStack> getCosmetic() {
+        return cosmetic;
     }
 }

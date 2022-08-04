@@ -204,6 +204,9 @@ Items:
   #
   # The text used for providing attributes
   attribute-text: '{attr}: '
+
+  # The text used for providing passive skill
+  passive-text: '&6✧&7 Nội tại:&6 {skill}'
   #
   # The slots to check for items in and apply requirements to.
   # This does not include held item, as that fluctuates and is assumed

@@ -34,8 +34,11 @@ import com.sucy.skill.listener.MainListener;
 import com.sucy.skill.log.Logger;
 import com.sucy.skill.manager.ComboManager;
 import mc.promcteam.engine.mccore.config.parse.DataSection;
+import mc.promcteam.engine.utils.ItemUT;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -70,7 +73,8 @@ public abstract class IOManager {
             ATTRIBS        = "attribs",
             COOLDOWN       = "cd",
             HUNGER         = "hunger",
-            ATTRIB_POINTS  = "attrib-points";
+            ATTRIB_POINTS  = "attrib-points",
+            VAULT          = "vault";
 
     /**
      * API reference
@@ -255,6 +259,20 @@ public abstract class IOManager {
                     acc.bind(Material.valueOf(bindKey), acc.getSkill(binds.getString(bindKey)));
                 }
             }
+            // load vault
+            DataSection vault = account.getSection(VAULT);
+            YamlConfiguration vaultData = acc.getVaultData();
+            if (vault != null ){
+                int size = vault.getInt("size",96);
+                vaultData.set("size",size);
+                for (int i = 0; i < size; i++) {
+                    String it = (String) vault.get(String.valueOf(i));
+                    vaultData.set(String.valueOf(i),it==null?null:ItemUT.fromBase64(it));
+                }
+            }else {
+                vaultData.set("size",96);
+                vaultData.set("size",96);
+            }
         }
         data.setAccount(file.getInt(ACTIVE, data.getActiveId()), false);
         data.getActiveData().setLastHealth(file.getDouble(HEALTH));
@@ -286,7 +304,7 @@ public abstract class IOManager {
 
                 // Save skills
                 DataSection skills = account.createSection(SKILLS);
-                for (PlayerSkill skill : acc.getSkills()) {
+                for (PlayerSkill skill : acc.getTrueSkills()) {
                     DataSection skillSection = skills.createSection(skill.getData().getName());
                     skillSection.set(LEVEL, skill.getLevel());
                     skillSection.set(POINTS, skill.getPoints());
@@ -350,6 +368,12 @@ public abstract class IOManager {
                 if (acc.getExtraData().size() > 0) {
                     account.set(EXTRA, acc.getExtraData());
                 }
+
+                //vault data
+                if (acc.getVaultData().getKeys(false).size()>0){
+                    account.set(VAULT,acc.getVaultDataSection());
+                }
+
             }
             return file;
         } catch (Exception ex) {

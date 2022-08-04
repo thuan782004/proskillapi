@@ -15,6 +15,10 @@ softdepend:
   - Mimic
 loadbefore: [ Quests ]
 api-version: 1.14
+commands:
+  tunnel:
+    description: my custom command
+    aliases: [tn]
 
 permissions:
   skillapi.basic:

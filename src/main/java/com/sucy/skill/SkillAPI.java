@@ -31,6 +31,8 @@ import com.sucy.skill.api.player.PlayerAccounts;
 import com.sucy.skill.api.player.PlayerClass;
 import com.sucy.skill.api.player.PlayerData;
 import com.sucy.skill.api.player.PlayerSkill;
+import com.sucy.tunnel.CustomCommand;
+import com.sucy.tunnel.CustomCore;
 import com.sucy.skill.data.PlayerStats;
 import com.sucy.skill.data.Settings;
 import com.sucy.skill.data.io.ConfigIO;
@@ -530,6 +532,7 @@ public class SkillAPI extends JavaPlugin {
      */
     public static void reload() {
         SkillAPI inst = inst();
+        CustomCommand.bookLoader.reload(inst());
         inst.onDisable();
         inst.onEnable();
     }
@@ -706,7 +709,7 @@ public class SkillAPI extends JavaPlugin {
         if (Bukkit.getServer().getPluginManager().getPlugin("Quests") != null) {
             ResourceManager.copyQuestsModule();
         }
-
+        CustomCore.active(this);
         loaded = true;
     }
 
