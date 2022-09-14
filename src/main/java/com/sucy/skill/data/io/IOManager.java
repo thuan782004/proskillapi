@@ -155,7 +155,7 @@ public abstract class IOManager {
                 for (String classKey : classes.keys()) {
                     RPGClass rpgClass = SkillAPI.getClass(classKey);
                     if (rpgClass != null) {
-                        PlayerClass c         = acc.setClass(rpgClass, true);
+                        PlayerClass c         = acc.setClass(null, rpgClass, true);
                         DataSection classData = classes.getSection(classKey);
                         int         levels    = classData.getInt(LEVEL);
                         if (levels > 0)
@@ -177,7 +177,6 @@ public abstract class IOManager {
                     PlayerSkill skillData = acc.getSkill(skillKey);
                     if (skillData != null) {
                         skillData.setLevel(skill.getInt(LEVEL));
-                        skillData.setPoints(skill.getInt(POINTS));
                         skillData.addCooldown(skill.getInt(COOLDOWN, 0));
                     }
                 }
@@ -307,7 +306,6 @@ public abstract class IOManager {
                 for (PlayerSkill skill : acc.getTrueSkills()) {
                     DataSection skillSection = skills.createSection(skill.getData().getName());
                     skillSection.set(LEVEL, skill.getLevel());
-                    skillSection.set(POINTS, skill.getPoints());
                     if (skill.isOnCooldown())
                         skillSection.set(COOLDOWN, skill.getCooldown());
                 }
