@@ -1,5 +1,6 @@
 package com.sucy.tunnel.book;
 
+import com.sucy.skill.SkillAPI;
 import com.sucy.tunnel.book.internals.BookButton;
 import com.sucy.tunnel.book.variable.ActiveSkillVar;
 import com.sucy.tunnel.book.variable.BookVariable;
@@ -22,6 +23,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class BookLoader {
+
+    public static final BookLoader ins = new BookLoader(SkillAPI.inst());
 
     public static HashMap<String, Class<? extends  BookVariable>> variables = new HashMap<>();
     static {
@@ -210,7 +213,7 @@ public class BookLoader {
         }
     }
 
-    private final HashMap<String,YamlConfiguration> data = new HashMap<>();
+    public final HashMap<String,YamlConfiguration> data = new HashMap<>();
     public BookLoader(Plugin p){
         reload(p);
     }

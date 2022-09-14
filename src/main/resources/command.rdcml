@@ -1,0 +1,33 @@
+tunnel{
+    vault {
+        reload {
+            hook tunnel_reload
+            permission tunnel.admin
+        }
+        open {
+            hook vault_open_self
+            user player
+            permission tunnel.member
+        }
+        open player:target {
+            hook vault_open_other
+            user player
+            permission tunnel.admin
+        }
+        size {
+            expand player:target?(context self) int:amount {
+                hook vault_expand
+                permission tunnel.admin
+            }
+            set player:target?(context self) int:amount {
+                hook vault_set
+                permission tunnel.admin
+            }
+        }
+    }
+    book player:target?(context self) book:book {
+        permission tunnel.member
+        hook open_book
+        user player
+    }
+}

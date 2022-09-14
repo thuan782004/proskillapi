@@ -52,6 +52,7 @@ import com.sucy.skill.task.GUITask;
 import com.sucy.skill.task.ManaTask;
 import com.sucy.skill.task.SaveTask;
 import com.sucy.skill.thread.MainThread;
+import com.sucy.tunnel.book.BookLoader;
 import mc.promcteam.engine.mccore.config.CommentedConfig;
 import mc.promcteam.engine.mccore.config.CommentedLanguageConfig;
 import mc.promcteam.engine.mccore.util.VersionManager;
@@ -532,7 +533,7 @@ public class SkillAPI extends JavaPlugin {
      */
     public static void reload() {
         SkillAPI inst = inst();
-        CustomCommand.bookLoader.reload(inst());
+        BookLoader.ins.reload(inst());
         inst.onDisable();
         inst.onEnable();
     }

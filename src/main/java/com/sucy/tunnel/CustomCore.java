@@ -12,10 +12,10 @@ public class CustomCore {
     public static void active(SkillAPI api){
         if (core!=null) return;
         core = new CustomCore(api);
+        new CustomCommand().active(api);
     }
     private CustomCore(SkillAPI api){
         this.api = api;
-        Objects.requireNonNull(api.getCommand("tunnel")).setExecutor(new CustomCommand());
         api.getServer().getConsoleSender().sendMessage("§2loaded CustomCore");
     }
 

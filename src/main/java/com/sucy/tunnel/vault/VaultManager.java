@@ -31,6 +31,11 @@ public class VaultManager {
     public void setSize(int newSize){
         data.set("size", newSize);
     }
+
+    public YamlConfiguration getData() {
+        return data;
+    }
+
     public void sort(){
         List<ItemStack> list = new ArrayList<>();
         int size = getSize();
@@ -59,7 +64,8 @@ public class VaultManager {
         for (int i = 0; i < size; i++) data.set(String.valueOf(i),list.size()>i?list.get(i):null);
 
     }
-    public String name(ItemStack i){
+
+    private String name(ItemStack i){
         if (!i.hasItemMeta()) return i.getType().name();
         ItemMeta meta = i.getItemMeta();
         assert meta != null;

@@ -117,7 +117,7 @@ public class PlayerData {
     private       boolean        passive;
     private       long           skillTimer;
     private       BukkitTask     removeTimer;
-    private final YamlConfiguration vault = new YamlConfiguration();
+    private       YamlConfiguration vault = new YamlConfiguration();
 
     /**
      * Initializes a new account data representation for a player.
@@ -2254,6 +2254,9 @@ public class PlayerData {
 
     public YamlConfiguration getVaultData(){
         return vault;
+    }
+    public YamlConfiguration clearVault(){
+        return vault = new YamlConfiguration();
     }
     public DataSection getVaultDataSection(){
         DataSection section = new DataSection();
