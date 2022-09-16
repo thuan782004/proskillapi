@@ -29,6 +29,8 @@ package com.sucy.skill.api.skills;
 import com.sucy.skill.SkillAPI;
 import com.sucy.skill.api.ReadOnlySettings;
 import com.sucy.skill.api.Settings;
+import com.sucy.skill.api.event.DamageEvent;
+import com.sucy.skill.api.event.PhysicalDamageEvent;
 import com.sucy.skill.api.event.SkillDamageEvent;
 import com.sucy.skill.api.event.TrueDamageEvent;
 import com.sucy.skill.api.player.PlayerCombos;
@@ -57,6 +59,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -65,6 +68,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents a template for a skill used in the RPG system. This is
@@ -739,13 +743,17 @@ public abstract class Skill implements IconHolder {
         // EntityDamageByEntityEvent unless we use knockback
         if (!SkillAPI.getSettings().canAttack(source, target)) return;
 
-        SkillDamageEvent event = new SkillDamageEvent(this, source, target, damage, classification, knockback);
+        DamageEvent event = new SkillDamageEvent(this, source, target, damage, classification, knockback);
+        if (Objects.equals(classification, "physic")) {
+            event = new PhysicalDamageEvent(source,target,damage,false);
+        }
+        if (event instanceof SkillDamageEvent)
         Bukkit.getPluginManager().callEvent(event);
         if (!event.isCancelled()) {
             if (source instanceof Player) {
                 Player player = (Player) source;
                 if (PluginChecker.isNoCheatActive()) NoCheatHook.exempt(player);
-                skillDamage = true;
+                skillDamage = event instanceof SkillDamageEvent;
                 target.setNoDamageTicks(0);
                 if (knockback) {
                     target.damage(event.getDamage(), source);
@@ -755,7 +763,7 @@ public abstract class Skill implements IconHolder {
                 skillDamage = false;
                 if (PluginChecker.isNoCheatActive()) NoCheatHook.unexempt(player);
             } else {
-                skillDamage = true;
+                skillDamage = event instanceof SkillDamageEvent;
                 //Modified code from mc.promcteam.engine.mccore.util.VersionManager.damage() (MCCore)
                 {
                     // Allow damage to occur

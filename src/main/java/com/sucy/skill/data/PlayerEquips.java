@@ -65,7 +65,7 @@ public class PlayerEquips {
      */
     public PlayerEquips(PlayerData player) {
         this.playerData = player;
-
+        new EquipData()
         for (int slot : SkillAPI.getSettings().getSlots()) {
             equips.put(slot, emptyEquip);
         }
@@ -192,7 +192,6 @@ public class PlayerEquips {
     public EquipData getEquipData(ItemStack item, EquipType type)   {return new EquipData(item, type);}
 
     public enum EquipType {
-
         HELMET,
         CHESTPLATE,
         LEGGINGS,
@@ -209,7 +208,7 @@ public class PlayerEquips {
                     return HOT_BAR_ITEM;
                 case 9 - 35:
                     return INVENTORY_ITEM;
-                case 36:
+                case 36:    
                     return BOOTS;
                 case 37:
                     return LEGGINGS;

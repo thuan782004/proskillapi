@@ -38,30 +38,12 @@ import org.bukkit.event.HandlerList;
  * An event for when an entity is damaged by
  * another entity with the use of a skill.
  */
-public class SkillDamageEvent extends Event implements Cancellable {
-    private static final  HandlerList  handlers  = new HandlerList();
-    /**
-     * Retrieves the entity that dealt the damage
-     *
-     * @return entity that dealt the damage
-     */
-    @Getter private final LivingEntity damager;
-    /**
-     * Retrieves the entity that received the damage
-     *
-     * @return entity that received the damage
-     */
-    @Getter private final LivingEntity target;
+public class SkillDamageEvent extends DamageEvent implements Cancellable {
     @Getter private final String       classification;
-    /**
-     * @return skill used to deal the damage
-     */
     @Getter private final Skill        skill;
-    private               double       damage;
     @Getter
     @Setter
     private               boolean      knockback;
-    private               boolean      cancelled = false;
 
     /**
      * Initializes a new event
@@ -70,72 +52,13 @@ public class SkillDamageEvent extends Event implements Cancellable {
      * @param damager        entity dealing the damage
      * @param target         entity receiving the damage
      * @param damage         the amount of damage dealt
-     * @param classification
+     * @param classification classification of damage
      */
     public SkillDamageEvent(Skill skill, LivingEntity damager, LivingEntity target, double damage,
                             String classification, boolean knockback) {
+        super(damager, target, damage);
         this.skill = skill;
-        this.damager = damager;
-        this.target = target;
-        this.damage = damage;
         this.classification = classification;
         this.knockback = knockback;
-    }
-
-    /**
-     * Retrieves the amount of damage dealt
-     *
-     * @return amount of damage dealt
-     */
-    public double getDamage() {
-        return damage;
-    }
-
-    /**
-     * Sets the amount of damage dealt
-     *
-     * @param amount amount of damage dealt
-     */
-    public void setDamage(double amount) {
-        damage = amount;
-    }
-
-    /**
-     * Checks whether or not the event is cancelled
-     *
-     * @return true if cancelled, false otherwise
-     */
-    @Override
-    public boolean isCancelled() {
-        return cancelled;
-    }
-
-    /**
-     * Sets the cancelled state of the event
-     *
-     * @param cancelled the cancelled state of the event
-     */
-    @Override
-    public void setCancelled(boolean cancelled) {
-        this.cancelled = cancelled;
-    }
-
-    /**
-     * Retrieves the handlers for the event
-     *
-     * @return list of event handlers
-     */
-    @Override
-    public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    /**
-     * Retrieves the handlers for the event
-     *
-     * @return list of event handlers
-     */
-    public static HandlerList getHandlerList() {
-        return handlers;
     }
 }

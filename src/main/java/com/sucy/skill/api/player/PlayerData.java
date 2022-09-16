@@ -1335,8 +1335,7 @@ public class PlayerData {
                 if (ps != null && ps.isUnlocked() && ps.getData() instanceof PassiveSkill) {
                     ((PassiveSkill) ps.getData()).stopEffects(getPlayer(), ps.getLevel());
                 }
-
-                if (settings.isProfessRefundSkills() && toSubclass) points += ps.getInvestedCost();
+                if (ps != null && settings.isProfessRefundSkills() && toSubclass) points += ps.getInvestedCost();
                 combos.removeSkill(skill);
             }
 

@@ -29,6 +29,7 @@ package com.sucy.skill.dynamic.mechanic;
 import org.bukkit.entity.LivingEntity;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Deals damage to each target
