@@ -65,9 +65,11 @@ public class PlayerEquips {
      */
     public PlayerEquips(PlayerData player) {
         this.playerData = player;
-        new EquipData()
         for (int slot : SkillAPI.getSettings().getSlots()) {
             equips.put(slot, emptyEquip);
+        }
+        for (int i=0; i<12; i++){
+            equips.put(1000+i, emptyEquip);
         }
     }
 
@@ -95,7 +97,8 @@ public class PlayerEquips {
 
         for (Entry<Integer, EquipData> entry : this.equips.entrySet()) {
             int slot = entry.getKey();
-            if (this.updateEquip(player, slot, player.getInventory().getItem(slot))) {
+            ItemStack item = slot<1000?player.getInventory().getItem(slot):playerData.getCosmetic().get(slot);
+            if (this.updateEquip(player, slot, item)) {
                 isChanged = true;
             }
         }
@@ -173,7 +176,10 @@ public class PlayerEquips {
 
         if (!to.hasMetConditions()) {
             if (SkillAPI.getSettings().isDropWeapon()) {
+                if (slot<1000)
                 player.getInventory().setItem(slot, null);
+                else
+                playerData.getCosmetic().put(slot,null);
                 player.updateInventory();
                 player.getWorld().dropItemNaturally(player.getLocation(), to.item);
 

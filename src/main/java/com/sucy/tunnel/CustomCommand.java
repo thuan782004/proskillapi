@@ -2,6 +2,7 @@ package com.sucy.tunnel;
 
 import com.sucy.skill.SkillAPI;
 import com.sucy.tunnel.book.BookLoader;
+import com.sucy.tunnel.cosmetic.CosmeticGui;
 import com.sucy.tunnel.vault.VaultGui;
 import com.sucy.tunnel.vault.VaultManager;
 import org.bukkit.command.CommandSender;
@@ -13,10 +14,15 @@ import redempt.redlib.commandmanager.CommandCollection;
 import redempt.redlib.commandmanager.CommandHook;
 import redempt.redlib.commandmanager.CommandParser;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.Objects;
+
 public class CustomCommand {
     public void active(Plugin plugin){
+
         ArgType<YamlConfiguration> book = new ArgType<>("book",BookLoader.ins.data::get)
-                .tabStream(c -> BookLoader.ins.data.keySet().stream());
+                .tabStream(c -> Arrays.stream(Objects.requireNonNull(new File(plugin.getDataFolder(), "book").list())));
         CommandCollection collection = new CommandParser(plugin.getResource("command.rdcml"))
                 .setArgTypes(book)
                 .parse();
@@ -50,5 +56,9 @@ public class CustomCommand {
     @CommandHook("open_book")
     public void open_book(Player sender,Player target, YamlConfiguration book){
         sender.openBook(BookLoader.parse(target,book));
+    }
+    @CommandHook("cosmetic")
+    public void cosmetic(Player sender){
+        new CosmeticGui(sender);
     }
 }

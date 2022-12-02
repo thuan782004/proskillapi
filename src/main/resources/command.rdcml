@@ -30,4 +30,9 @@ tunnel{
         hook open_book
         user player
     }
+    cosmetic {
+        permission tunnel.member
+        hook cosmetic
+        user player
+    }
 }

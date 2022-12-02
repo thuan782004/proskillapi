@@ -23,8 +23,12 @@
 
     <repositories>
         <repository>
+            <id>mavenlibs-repo</id>
+            <url>https://mavenlibs.com/maven/pom/</url>
+        </repository>
+        <repository>
             <id>bungeecord-repo</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <url>https://repo1.maven.org/maven2/</url>
         </repository>
         <repository>
             <id>spigotmc-repo</id>
@@ -32,7 +36,7 @@
         </repository>
         <repository>
             <id>sonatype</id>
-            <url>https://oss.sonatype.org/content/groups/public/</url>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
         </repository>
         <repository>
             <id>md_5-snapshots</id>
@@ -158,16 +162,14 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.github.promcteam</groupId>
+            <groupId>com.promcteam</groupId>
             <artifactId>promccore</artifactId>
-            <version>dev-SNAPSHOT</version>
-            <scope>provided</scope>
+            <version>1.0.3.10-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>com.github.promcteam</groupId>
+            <groupId>com.promcteam</groupId>
             <artifactId>proskillapiparties</artifactId>
-            <version>master-SNAPSHOT</version>
-            <scope>provided</scope>
+            <version>1.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>ru.endlesscode.mimic</groupId>
@@ -224,15 +226,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.2.0</version>
-                <configuration>
-                    <reportOutputDirectory>${project.basedir}</reportOutputDirectory>
-                    <destDir>gh-pages/javadocs</destDir>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

@@ -214,7 +214,7 @@ public class BookLoader {
     }
 
     public final HashMap<String,YamlConfiguration> data = new HashMap<>();
-    public BookLoader(Plugin p){
+    private BookLoader(Plugin p){
         reload(p);
     }
     public void reload(Plugin p){

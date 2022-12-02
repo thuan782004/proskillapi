@@ -2299,4 +2299,7 @@ public class PlayerData {
     public HashMap<Integer, ItemStack> getCosmetic() {
         return cosmetic;
     }
+    public void setCosmetic(int slot, ItemStack item){
+        cosmetic.put(slot,item);
+    }
 }
